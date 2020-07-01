@@ -1,15 +1,38 @@
 #!/bin/bash
-echo -e "Installing Zsh..."
-apt-get -q -y install zsh
-echo -e "Installing Oh My Zsh..."
+export ZSH_CUSTOM=~/.oh-my-zsh/custom
+function eInfo {
+    echo -e "\e[94m${1}\033[0m"
+}
+function eWarn {
+    echo -e "\e[93m${1}\033[0m"
+}
+
+function gitInstall {
+    local gitUrl=${1}
+    local to=${2}
+    if [ ! -d $to ]; then
+        eInfo "Installing" "$gitUrl" "to" "$to"
+        git clone "$gitUrl" "$to"
+        chmod 755 "$to"
+    else
+        eWarn "Skipping to install $gitUrl to $to"
+    fi
+}
+
+eInfo "Installing Zsh tmux..."
+apt-get -q -y install zsh tmux
+eInfo "Installing Oh My Zsh..."
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-#   ## To install ZSH themes & aliases
-#   echo -e "Copying ZSH themes & aliases..."
-#   echo -e "Check .aliases file for more details."
-# #   cp oh-my-zsh/aliases ~/.aliases                                        ## Copy aliases
-# #   cp oh-my-zsh/zshrc ~/.zshrc                                            ## Copy zshrc configs
-# #   cp oh-my-zsh/dracula.zsh-theme ~/.oh-my-zsh/themes/dracula.zsh-theme   ## Copy custom dracula theme
-# #   cp oh-my-zsh/z.sh ~/z.sh                                               ## Copy z.sh autocompletion file
-# #   git clone https://github.com/peterhurford/git-it-on.zsh ~/.oh-my-zsh/custom/plugins/git-it-on ## Copy git it on utilities plugin
-# fi
+
+
+gitInstall https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
+gitInstall https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
+
+
+eInfo "Copying dotfiles"
+cp .[^.]* ~/
+
+if uname -a | grep -q '^Linux.*Microsoft'; then
+	eInfo "In WSL"
+fi
