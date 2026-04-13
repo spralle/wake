@@ -104,8 +104,8 @@ On Windows (PowerShell):
 
 ```powershell
 sync-principles.ps1
-sync-principles.ps1 -Force
-sync-principles.ps1 -DryRun
+sync-principles.ps1 --force
+sync-principles.ps1 --dry-run
 ```
 
 The script copies all `*.md` files from `~/.config/opencode/principles/` into

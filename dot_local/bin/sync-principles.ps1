@@ -2,37 +2,39 @@
 #
 # Usage:
 #   sync-principles              # interactive — shows diff, asks before overwriting
-#   sync-principles -Force       # overwrite without asking
-#   sync-principles -DryRun      # show what would change without writing
-#   sync-principles -Help        # show usage
+#   sync-principles --force      # overwrite without asking
+#   sync-principles --dry-run    # show what would change without writing
+#   sync-principles --help       # show usage
 
-param(
-    [switch]$Force,
-    [switch]$DryRun,
-    [switch]$Help
-)
-
-$SourceDir = Join-Path $env:USERPROFILE ".config\opencode\principles"
-$TargetDir = "docs\principles"
+$Force = $false
+$DryRun = $false
 
 function Show-Usage {
-    Write-Host "Usage: sync-principles [-Force | -DryRun | -Help]"
+    Write-Host "Usage: sync-principles [--force | --dry-run | --help]"
     Write-Host ""
     Write-Host "Syncs shared code principles from ~/.config/opencode/principles/"
     Write-Host "into the current project's docs\principles\ directory."
     Write-Host ""
     Write-Host "Options:"
-    Write-Host "  -Force     Overwrite changed files without asking"
-    Write-Host "  -DryRun    Show what would change without writing anything"
-    Write-Host "  -Help      Show this help"
+    Write-Host "  --force     Overwrite changed files without asking"
+    Write-Host "  --dry-run   Show what would change without writing anything"
+    Write-Host "  --help      Show this help"
     Write-Host ""
     Write-Host "Project-specific files (ones not in the global source) are never touched."
 }
 
-if ($Help) {
-    Show-Usage
-    exit 0
+# Parse args
+foreach ($arg in $args) {
+    switch ($arg) {
+        "--force"   { $Force = $true }
+        "--dry-run" { $DryRun = $true }
+        "--help"    { Show-Usage; exit 0 }
+        default     { Write-Host "Unknown option: $arg"; Show-Usage; exit 1 }
+    }
 }
+
+$SourceDir = Join-Path $env:USERPROFILE ".config\opencode\principles"
+$TargetDir = "docs\principles"
 
 # Validate
 if (-not (Test-Path $SourceDir)) {
