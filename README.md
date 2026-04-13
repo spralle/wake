@@ -86,23 +86,33 @@ chezmoi add --encrypt ~/.config/sensitive-file
 
 ## Syncing Principles to Project Repos
 
-The shared code principles live in `dot_config/opencode/principles/` and get applied
+The shared code principles live in `~/.config/opencode/principles/` and get applied
 globally via the global `opencode.json`. For **contributor visibility**, projects should
 also carry copies of the relevant principles in their repo.
 
-### Manual sync
-
-Copy the principles your project needs into its `docs/principles/` directory:
+A `sync-principles` script is installed by chezmoi into `~/.local/bin/`. Run it from
+any project root to sync:
 
 ```bash
 # From a project repo root (e.g., armada)
-mkdir -p docs/principles
-cp ~/.config/opencode/principles/universal.md docs/principles/
-cp ~/.config/opencode/principles/typescript.md docs/principles/
-cp ~/.config/opencode/principles/frontend.md docs/principles/
+sync-principles              # interactive — shows diffs, asks before overwriting
+sync-principles --force      # overwrite all changed files without asking
+sync-principles --dry-run    # preview what would change
 ```
 
-Then reference them in the project's `opencode.json`:
+On Windows (PowerShell):
+
+```powershell
+sync-principles.ps1
+sync-principles.ps1 -Force
+sync-principles.ps1 -DryRun
+```
+
+The script copies all `*.md` files from `~/.config/opencode/principles/` into
+`docs/principles/` in the current project. Project-specific files (ones that don't
+exist in the global source) are never touched.
+
+After syncing, reference the principles in the project's `opencode.json`:
 
 ```json
 {
@@ -128,20 +138,13 @@ Then reference them in the project's `opencode.json`:
 Projects should also create their own `docs/principles/<project>.md` for project-specific
 rules (e.g., design token conventions, framework constraints).
 
-### Keeping in sync
-
-When you update principles in wake, re-copy them to your project repos. A diff check:
-
-```bash
-diff ~/.config/opencode/principles/universal.md docs/principles/universal.md
-```
-
 ## Structure
 
 - `dot_*` — Files mapped to `$HOME` via chezmoi naming (`dot_` becomes `.`)
 - `dot_config/opencode/` — OpenCode agents, principles, and global config
 - `dot_config/opencode/agents/` — Personal agent prompts (not shared with project contributors)
 - `dot_config/opencode/principles/` — Shared code principles (copied into project repos)
+- `dot_local/bin/` — CLI scripts deployed to `~/.local/bin/` (sync-principles)
 - `packages/` — Declarative package lists for Arch Linux and Windows
 - `.chezmoiscripts/` — Auto-run scripts for package installation on apply
 - `.chezmoiexternal.toml` — External dependencies (LazyVim, oh-my-zsh)

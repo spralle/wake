@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+# sync-principles — Sync shared code principles from dotfiles into the current project
+#
+# Usage:
+#   sync-principles              # interactive — shows diff, asks before overwriting
+#   sync-principles --force      # overwrite without asking
+#   sync-principles --dry-run    # show what would change without writing
+#   sync-principles --help       # show usage
+
+set -euo pipefail
+
+SOURCE_DIR="${HOME}/.config/opencode/principles"
+TARGET_DIR="docs/principles"
+
+usage() {
+    echo "Usage: sync-principles [--force | --dry-run | --help]"
+    echo ""
+    echo "Syncs shared code principles from ~/.config/opencode/principles/"
+    echo "into the current project's docs/principles/ directory."
+    echo ""
+    echo "Options:"
+    echo "  --force     Overwrite changed files without asking"
+    echo "  --dry-run   Show what would change without writing anything"
+    echo "  --help      Show this help"
+    echo ""
+    echo "Project-specific files (ones not in the global source) are never touched."
+}
+
+# Parse args
+FORCE=false
+DRY_RUN=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --force)   FORCE=true ;;
+        --dry-run) DRY_RUN=true ;;
+        --help)    usage; exit 0 ;;
+        *)         echo "Unknown option: $arg"; usage; exit 1 ;;
+    esac
+done
+
+# Validate
+if [ ! -d "$SOURCE_DIR" ]; then
+    echo "Error: Source directory not found: $SOURCE_DIR"
+    echo "Run 'chezmoi apply' first to set up your dotfiles."
+    exit 1
+fi
+
+if [ ! -f "opencode.json" ] && [ ! -f "package.json" ]; then
+    echo "Error: Not in a project root (no opencode.json or package.json found)."
+    exit 1
+fi
+
+# Ensure target directory exists
+if [ "$DRY_RUN" = false ]; then
+    mkdir -p "$TARGET_DIR"
+fi
+
+# Track results
+synced=0
+skipped=0
+unchanged=0
+
+for source_file in "$SOURCE_DIR"/*.md; do
+    [ -f "$source_file" ] || continue
+
+    filename=$(basename "$source_file")
+    target_file="$TARGET_DIR/$filename"
+
+    # If target doesn't exist, it's a new file
+    if [ ! -f "$target_file" ]; then
+        if [ "$DRY_RUN" = true ]; then
+            echo "[new]       $filename"
+        else
+            cp "$source_file" "$target_file"
+            echo "[added]     $filename"
+        fi
+        synced=$((synced + 1))
+        continue
+    fi
+
+    # Compare
+    if diff -q "$source_file" "$target_file" > /dev/null 2>&1; then
+        unchanged=$((unchanged + 1))
+        continue
+    fi
+
+    # File differs
+    if [ "$DRY_RUN" = true ]; then
+        echo "[changed]   $filename"
+        diff --color=auto -u "$target_file" "$source_file" || true
+        synced=$((synced + 1))
+        continue
+    fi
+
+    if [ "$FORCE" = true ]; then
+        cp "$source_file" "$target_file"
+        echo "[updated]   $filename"
+        synced=$((synced + 1))
+        continue
+    fi
+
+    # Interactive — show diff and ask
+    echo ""
+    echo "--- $filename has changes ---"
+    diff --color=auto -u "$target_file" "$source_file" || true
+    echo ""
+    read -rp "Overwrite $filename? [y/N/d(iff)] " answer
+    case "$answer" in
+        y|Y)
+            cp "$source_file" "$target_file"
+            echo "[updated]   $filename"
+            synced=$((synced + 1))
+            ;;
+        d|D)
+            diff --color=auto "$target_file" "$source_file" || true
+            read -rp "Overwrite $filename? [y/N] " answer2
+            if [ "$answer2" = "y" ] || [ "$answer2" = "Y" ]; then
+                cp "$source_file" "$target_file"
+                echo "[updated]   $filename"
+                synced=$((synced + 1))
+            else
+                echo "[skipped]   $filename"
+                skipped=$((skipped + 1))
+            fi
+            ;;
+        *)
+            echo "[skipped]   $filename"
+            skipped=$((skipped + 1))
+            ;;
+    esac
+done
+
+echo ""
+echo "Done. $synced synced, $unchanged unchanged, $skipped skipped."
+
+if [ "$synced" -gt 0 ] && [ "$DRY_RUN" = false ]; then
+    echo ""
+    echo "Remember to update opencode.json instructions if you added new principle files."
+fi
