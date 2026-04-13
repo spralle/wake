@@ -1,0 +1,37 @@
+# Shell
+zsh
+tmux
+starship
+
+# Dev tools
+git
+git-delta
+neovim
+mise
+base-devel
+
+# CLI utilities
+ripgrep
+fd
+bat
+fzf
+lazygit
+jq
+curl
+wget
+htop
+btop
+
+# Node.js (managed by mise, but need base)
+nodejs
+npm
+
+# Container
+docker
+docker-compose
+
+# Fonts
+ttf-jetbrains-mono-nerd
+
+# System
+openssh

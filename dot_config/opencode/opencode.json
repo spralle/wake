@@ -1,0 +1,5 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["~/.config/opencode/principles/universal.md"],
+  "default_agent": "builder"
+}

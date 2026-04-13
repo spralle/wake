@@ -1,0 +1,20 @@
+# Search hidden files but respect .gitignore
+--hidden
+
+# Ignore common non-source directories
+--glob=!.git/
+--glob=!node_modules/
+--glob=!target/
+--glob=!dist/
+--glob=!build/
+--glob=!.next/
+--glob=!coverage/
+
+# Smart case sensitivity
+--smart-case
+
+# Show line numbers
+--line-number
+
+# Add context lines
+--context=2

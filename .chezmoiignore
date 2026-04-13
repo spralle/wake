@@ -1,0 +1,20 @@
+README.md
+LICENSE
+docs/
+packages/
+
+# Linux-only files — ignore on Windows
+{{- if eq .chezmoi.os "windows" }}
+dot_zshrc.tmpl
+dot_tmux.conf
+.chezmoiscripts/run_onchange_linux-packages.sh.tmpl
+.oh-my-zsh
+{{- end }}
+
+# Windows-only files — ignore on Linux
+{{- if ne .chezmoi.os "windows" }}
+Documents/
+AppData/
+dot_config/Code/
+.chezmoiscripts/run_onchange_windows-packages.ps1.tmpl
+{{- end }}

@@ -1,0 +1,19 @@
+# Chezmoi
+.chezmoidata/
+key.txt
+
+# Age encryption
+*.age
+!*.age.tmpl
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

@@ -1,0 +1,6 @@
+# bat configuration
+--theme="Dracula"
+--style="numbers,changes,header"
+--italic-text=always
+--map-syntax "*.json:JSON"
+--map-syntax "*.jsonc:JSON"

@@ -1,0 +1,16 @@
+# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
+# Install Windows packages via winget
+# This script runs when packages/winget-packages.json changes
+# hash: {{ include "packages/winget-packages.json" | sha256sum }}
+
+Write-Host "Installing Windows packages via winget..."
+
+$packageFile = "{{ .chezmoi.sourceDir }}\packages\winget-packages.json"
+
+if (Test-Path $packageFile) {
+    winget import --import-file $packageFile --accept-package-agreements --accept-source-agreements --ignore-unavailable
+} else {
+    Write-Warning "Package file not found: $packageFile"
+}
+
+Write-Host "Package installation complete."

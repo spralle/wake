@@ -1,0 +1,49 @@
+# wake managed dotfile — do not edit directly, use `chezmoi edit`
+[user]
+    name = {{ .name }}
+    email = {{ .email }}
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+
+[push]
+    autoSetupRemote = true
+    default = current
+
+[fetch]
+    prune = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    algorithm = histogram
+    colorMoved = default
+
+[core]
+    autocrlf = false
+    eol = lf
+    editor = nvim
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true
+    side-by-side = true
+    line-numbers = true
+    syntax-theme = Dracula
+
+[alias]
+    co = checkout
+    br = branch
+    ci = commit
+    st = status
+    lg = log --oneline --graph --all --decorate -20
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    amend = commit --amend --no-edit

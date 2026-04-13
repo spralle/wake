@@ -1,0 +1,9 @@
+# Global tool versions managed by mise
+# Project-local .mise.toml files override these
+
+[tools]
+node = "lts"
+bun = "latest"
+
+[settings]
+experimental = true

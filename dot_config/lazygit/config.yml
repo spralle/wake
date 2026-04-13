@@ -1,0 +1,26 @@
+# lazygit configuration
+gui:
+  showIcons: true
+  nerdFontsVersion: "3"
+  theme:
+    activeBorderColor:
+      - "#7aa2f7"
+      - bold
+    inactiveBorderColor:
+      - "#3b4261"
+    selectedLineBgColor:
+      - "#283457"
+
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never
+  autoFetch: true
+  autoRefresh: true
+
+os:
+  editPreset: "nvim"
+
+keybinding:
+  universal:
+    quit: "q"

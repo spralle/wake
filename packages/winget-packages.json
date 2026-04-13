@@ -1,0 +1,31 @@
+{
+    "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+    "Sources": [
+        {
+            "Packages": [
+                { "PackageIdentifier": "Git.Git" },
+                { "PackageIdentifier": "GitHub.cli" },
+                { "PackageIdentifier": "dandavison.delta" },
+                { "PackageIdentifier": "Neovim.Neovim" },
+                { "PackageIdentifier": "jdx.mise" },
+                { "PackageIdentifier": "Starship.Starship" },
+                { "PackageIdentifier": "BurntSushi.ripgrep.MSVC" },
+                { "PackageIdentifier": "sharkdp.fd" },
+                { "PackageIdentifier": "sharkdp.bat" },
+                { "PackageIdentifier": "junegunn.fzf" },
+                { "PackageIdentifier": "JesseDuffield.lazygit" },
+                { "PackageIdentifier": "stedolan.jq" },
+                { "PackageIdentifier": "twpayne.chezmoi" },
+                { "PackageIdentifier": "Microsoft.VisualStudioCode" },
+                { "PackageIdentifier": "JetBrains.Mono" },
+                { "PackageIdentifier": "Docker.DockerDesktop" }
+            ],
+            "SourceDetails": {
+                "Argument": "https://cdn.winget.microsoft.com/cache",
+                "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
+                "Name": "winget",
+                "Type": "Microsoft.PreIndexed.Package"
+            }
+        }
+    ]
+}
