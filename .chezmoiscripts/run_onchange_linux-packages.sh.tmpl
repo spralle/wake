@@ -1,5 +1,5 @@
+{{- if eq .chezmoi.os "linux" }}
 #!/bin/bash
-# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
 # Install Arch Linux packages
 # This script runs when packages/arch-packages.txt changes
 # hash: {{ include "packages/arch-packages.txt" | sha256sum }}
@@ -19,3 +19,4 @@ while IFS= read -r pkg; do
 done < "{{ .chezmoi.sourceDir }}/packages/arch-packages.txt"
 
 echo "Package installation complete."
+{{- end }}

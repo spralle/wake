@@ -1,9 +1,6 @@
-# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
+{{- if eq .chezmoi.os "windows" }}
 # Install JetBrainsMono Nerd Font on Windows
 # This script runs once on first chezmoi apply
-{{ if ne .chezmoi.os "windows" }}
-# skip: not Windows
-{{ else }}
 
 $fontName = "JetBrainsMono"
 $nfVersion = "3.3.0"
@@ -53,5 +50,4 @@ Get-ChildItem -Path "$tempDir\$fontName" -Filter "*.ttf" | ForEach-Object {
 Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
 Write-Host "JetBrainsMono Nerd Font installed. Restart terminals to use it."
-
-{{ end }}
+{{- end }}

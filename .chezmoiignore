@@ -7,8 +7,6 @@ packages/
 {{- if eq .chezmoi.os "windows" }}
 dot_zshrc.tmpl
 dot_tmux.conf
-.chezmoiscripts/run_onchange_linux-packages.sh.tmpl
-.chezmoiscripts/run_once_install-nerd-font.sh.tmpl
 dot_local/bin/executable_sync-principles
 .oh-my-zsh
 {{- end }}
@@ -18,7 +16,5 @@ dot_local/bin/executable_sync-principles
 Documents/
 AppData/
 dot_config/Code/
-.chezmoiscripts/run_onchange_windows-packages.ps1.tmpl
-.chezmoiscripts/run_once_install-nerd-font.ps1.tmpl
 dot_local/bin/sync-principles.ps1
 {{- end }}

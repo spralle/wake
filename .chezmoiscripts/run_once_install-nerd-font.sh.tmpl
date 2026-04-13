@@ -1,11 +1,7 @@
+{{- if eq .chezmoi.os "linux" }}
 #!/bin/bash
-# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
 # Install JetBrainsMono Nerd Font on Linux
 # This script runs once on first chezmoi apply
-{{ if ne .chezmoi.os "linux" }}
-# skip: not Linux
-exit 0
-{{ else }}
 
 set -euo pipefail
 
@@ -41,5 +37,4 @@ fc-cache -fv "${FONT_DIR}"
 rm -rf "${TEMP_DIR}"
 
 echo "JetBrainsMono Nerd Font installed. Restart terminals to use it."
-
-{{ end }}
+{{- end }}

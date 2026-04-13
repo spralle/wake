@@ -1,4 +1,4 @@
-# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
+{{- if eq .chezmoi.os "windows" }}
 # Install Windows packages via winget
 # This script runs when packages/winget-packages.json changes
 # hash: {{ include "packages/winget-packages.json" | sha256sum }}
@@ -14,3 +14,4 @@ if (Test-Path $packageFile) {
 }
 
 Write-Host "Package installation complete."
+{{- end }}
