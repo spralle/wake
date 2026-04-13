@@ -43,6 +43,19 @@ Explorer usage policy (conditional, not default):
 - Keep commits focused and atomic.
 - Write commit messages that explain *why*, not *what*.
 
+## Changesets
+
+When a project uses [changesets](https://github.com/changesets/changesets) for versioning:
+
+- Engineer MUST include a changeset file (`.changeset/*.md`) whenever a publishable package changes.
+- Engineer MUST NOT add a changeset when changes are limited to non-publishable surfaces (docs-only, CI/workflow-only, tests-only with no runtime impact, or internal-only changes).
+- Engineer bump guidance:
+  - `patch`: backward-compatible bug fixes, small internal improvements, dependency updates with no API change.
+  - `minor`: backward-compatible new features or additive API surface.
+  - `major`: breaking API/behavior changes requiring consumer action.
+- Auditor MUST verify that a changeset exists for publishable package changes and that the bump type matches the actual impact.
+- Auditor MUST verify no-changeset cases are correctly justified when no publishable package surface changed.
+
 ## Session Completion
 
 When ending a work session, complete ALL steps:
