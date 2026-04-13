@@ -1,0 +1,45 @@
+#!/bin/bash
+# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
+# Install JetBrainsMono Nerd Font on Linux
+# This script runs once on first chezmoi apply
+{{ if ne .chezmoi.os "linux" }}
+# skip: not Linux
+exit 0
+{{ else }}
+
+set -euo pipefail
+
+FONT_NAME="JetBrainsMono"
+NF_VERSION="3.3.0"
+FONT_DIR="${HOME}/.local/share/fonts/NerdFonts"
+
+# Check if already installed
+if fc-list | grep -qi "JetBrainsMono Nerd Font"; then
+    echo "JetBrainsMono Nerd Font already installed, skipping."
+    exit 0
+fi
+
+echo "Installing JetBrainsMono Nerd Font v${NF_VERSION}..."
+
+ZIP_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v${NF_VERSION}/${FONT_NAME}.zip"
+TEMP_DIR=$(mktemp -d)
+
+# Download
+echo "Downloading from ${ZIP_URL}..."
+curl -fsSL -o "${TEMP_DIR}/${FONT_NAME}.zip" "${ZIP_URL}"
+
+# Extract
+echo "Extracting fonts..."
+mkdir -p "${FONT_DIR}"
+unzip -o "${TEMP_DIR}/${FONT_NAME}.zip" "*.ttf" -d "${FONT_DIR}"
+
+# Refresh font cache
+echo "Refreshing font cache..."
+fc-cache -fv "${FONT_DIR}"
+
+# Clean up
+rm -rf "${TEMP_DIR}"
+
+echo "JetBrainsMono Nerd Font installed. Restart terminals to use it."
+
+{{ end }}

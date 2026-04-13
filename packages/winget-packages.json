@@ -17,7 +17,7 @@
                 { "PackageIdentifier": "stedolan.jq" },
                 { "PackageIdentifier": "twpayne.chezmoi" },
                 { "PackageIdentifier": "Microsoft.VisualStudioCode" },
-                { "PackageIdentifier": "JetBrains.Mono" },
+
                 { "PackageIdentifier": "Docker.DockerDesktop" }
             ],
             "SourceDetails": {

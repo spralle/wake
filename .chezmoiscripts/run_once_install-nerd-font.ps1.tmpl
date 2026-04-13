@@ -1,0 +1,57 @@
+# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
+# Install JetBrainsMono Nerd Font on Windows
+# This script runs once on first chezmoi apply
+{{ if ne .chezmoi.os "windows" }}
+# skip: not Windows
+{{ else }}
+
+$fontName = "JetBrainsMono"
+$nfVersion = "3.3.0"
+$fontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+$tempDir = "$env:TEMP\nerd-fonts"
+
+# Check if already installed (user fonts directory)
+$installed = Get-ChildItem -Path $fontDir -Filter "JetBrainsMonoNerdFont-Regular.ttf" -ErrorAction SilentlyContinue
+
+if ($installed) {
+    Write-Host "JetBrainsMono Nerd Font already installed, skipping."
+    exit 0
+}
+
+Write-Host "Installing JetBrainsMono Nerd Font v$nfVersion..."
+
+# Download
+$zipUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/v$nfVersion/$fontName.zip"
+$zipPath = "$tempDir\$fontName.zip"
+
+New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+New-Item -ItemType Directory -Path $fontDir -Force | Out-Null
+
+Write-Host "Downloading from $zipUrl..."
+Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
+
+# Extract
+Write-Host "Extracting fonts..."
+Expand-Archive -Path $zipPath -DestinationPath "$tempDir\$fontName" -Force
+
+# Install each .ttf file as a user font
+$shellApp = New-Object -ComObject Shell.Application
+$fontsFolder = $shellApp.Namespace(0x14)  # Windows Fonts folder
+
+Get-ChildItem -Path "$tempDir\$fontName" -Filter "*.ttf" | ForEach-Object {
+    $destPath = Join-Path $fontDir $_.Name
+    if (-not (Test-Path $destPath)) {
+        Copy-Item $_.FullName $destPath
+        # Register the font for the current user
+        $regPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+        $fontTitle = $_.BaseName -replace "NerdFont", " Nerd Font" -replace "([a-z])([A-Z])", '$1 $2'
+        New-ItemProperty -Path $regPath -Name "$fontTitle (TrueType)" -Value $destPath -PropertyType String -Force | Out-Null
+    }
+}
+
+# Clean up
+Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
+
+Write-Host "JetBrainsMono Nerd Font installed. Restart terminals to use it."
+
+{{ end }}
