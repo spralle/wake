@@ -7,10 +7,14 @@ $env:EDITOR = "nvim"
 Invoke-Expression (&starship init powershell)
 
 # PSReadLine configuration
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -PredictionViewStyle ListView
 Set-PSReadLineOption -EditMode Emacs
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+# PredictionSource/PredictionViewStyle require PSReadLine 2.2+ (PS 7+ bundled)
+$psrlVersion = (Get-Module PSReadLine).Version
+if ($psrlVersion -ge [version]"2.2.0") {
+    Set-PSReadLineOption -PredictionSource History
+    Set-PSReadLineOption -PredictionViewStyle ListView
+}
 
 # Aliases
 Set-Alias -Name ll -Value Get-ChildItem
@@ -25,8 +29,8 @@ function cma { chezmoi apply }
 function cmd { chezmoi diff }
 function cmu { chezmoi update }
 
-# mise (runtime manager)
-if (Get-Command mise -ErrorAction SilentlyContinue) {
+# mise (runtime manager) — pwsh activation requires PS 7+
+if ($PSVersionTable.PSVersion.Major -ge 7 -and (Get-Command mise -ErrorAction SilentlyContinue)) {
     & mise activate pwsh | Invoke-Expression
 }
 
