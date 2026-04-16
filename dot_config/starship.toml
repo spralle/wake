@@ -1,6 +1,8 @@
 # Starship prompt config — cross-platform (zsh + PowerShell)
 # Docs: https://starship.rs/config/
 
+scan_timeout = 100
+
 format = """
 $username\
 $hostname\
