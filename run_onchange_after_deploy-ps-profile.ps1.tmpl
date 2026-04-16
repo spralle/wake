@@ -1,0 +1,22 @@
+{{- if eq .chezmoi.os "windows" -}}
+# deploy-ps-profile hash: {{ include ".chezmoitemplates/powershell-profile.ps1" | sha256sum }}
+# Deploys PowerShell profile to the correct Documents path (handles OneDrive
+# redirection and locale differences) for both PS 5.1 and PS 7+.
+
+$profileContent = @'
+{{ include ".chezmoitemplates/powershell-profile.ps1" }}'@
+
+$docsPath = [Environment]::GetFolderPath("MyDocuments")
+
+# PS 5.1 — WindowsPowerShell
+$ps5Dir = Join-Path $docsPath "WindowsPowerShell"
+if (-not (Test-Path $ps5Dir)) { New-Item -ItemType Directory -Path $ps5Dir -Force | Out-Null }
+Set-Content -Path (Join-Path $ps5Dir "Microsoft.PowerShell_profile.ps1") -Value $profileContent -Force
+Write-Host "Deployed PS 5.1 profile -> $ps5Dir"
+
+# PS 7+ — PowerShell
+$ps7Dir = Join-Path $docsPath "PowerShell"
+if (-not (Test-Path $ps7Dir)) { New-Item -ItemType Directory -Path $ps7Dir -Force | Out-Null }
+Set-Content -Path (Join-Path $ps7Dir "Microsoft.PowerShell_profile.ps1") -Value $profileContent -Force
+Write-Host "Deployed PS 7+ profile -> $ps7Dir"
+{{- end }}

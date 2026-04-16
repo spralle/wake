@@ -13,7 +13,6 @@ dot_local/bin/executable_sync-principles
 
 # Windows-only files — ignore on Linux
 {{- if ne .chezmoi.os "windows" }}
-Documents/
 AppData/
 dot_config/Code/
 dot_local/bin/sync-principles.ps1
