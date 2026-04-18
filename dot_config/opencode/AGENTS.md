@@ -42,6 +42,7 @@ Explorer usage policy (conditional, not default):
 - Use `feature/*` branches for feature, task, and chore work.
 - Keep commits focused and atomic.
 - Write commit messages that explain *why*, not *what*.
+- **ALWAYS use worktrees for implementation work.** Never commit directly on the main/master branch. Use `bd worktree create` (if the project uses bd) or `git worktree add` to isolate work. All subagents (especially Engineer) must receive the worktree path as their working directory.
 
 ## Changesets
 
