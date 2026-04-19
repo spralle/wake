@@ -2,9 +2,8 @@
 .chezmoidata/
 key.txt
 
-# Age encryption
-*.age
-!*.age.tmpl
+# Age encryption - allow chezmoi encrypted files (they're safe to commit)
+# key.txt above covers the actual secret
 
 # OS
 .DS_Store

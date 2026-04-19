@@ -2,10 +2,16 @@
 {{- $email := promptStringOnce . "email" "Email address" -}}
 {{- $is_work := promptBoolOnce . "is_work" "Is this a work machine" -}}
 
+encryption = "age"
+
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
     is_work = {{ $is_work }}
+
+[age]
+    identity = "~/key.txt"
+    recipient = "age1ya3cgycjcq5vhg48tqmypf35t7uhjxc85hggg073u5gkt4a8jfcs23xp4v"
 
 [edit]
     command = "nvim"
