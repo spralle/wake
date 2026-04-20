@@ -4,6 +4,7 @@
 Host *
     AddKeysToAgent yes
     IdentitiesOnly yes
+    IdentityFile ~/.ssh/id_ed25519
     ServerAliveInterval 60
     ServerAliveCountMax 3
 
@@ -12,8 +13,6 @@ Host *
     UseKeychain yes
 {{ end -}}
 
-# Add host-specific entries below
-# Host example
-#     HostName example.com
-#     User deploy
-#     IdentityFile ~/.ssh/id_ed25519
+Host gascity
+    HostName 167.99.218.131
+    User zeroshore
