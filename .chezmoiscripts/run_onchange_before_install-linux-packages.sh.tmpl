@@ -11,6 +11,60 @@ MISE_CONFIG_FILE={{ joinPath .chezmoi.sourceDir "dot_config/mise/config.toml" | 
 OS_RELEASE_FILE="${OS_RELEASE_FILE:-/etc/os-release}"
 LOCAL_BIN="${HOME}/.local/bin"
 
+portable_metadata() {
+    local tool=$1
+    awk -v tool="$tool" -v checksum_column="$checksum_column" \
+        '$1 == tool { print $4, $checksum_column }' "$PACKAGE_FILE"
+}
+
+install_binary_archive() (
+    local url=$1 member=$2 destination=$3 checksum=$4
+    local temp_dir archive
+    temp_dir=$(mktemp -d)
+    trap 'rm -rf "$temp_dir"' EXIT
+    archive="$temp_dir/archive.tar.gz"
+    curl -fsSL "$url" -o "$archive"
+    printf '%s  %s\n' "$checksum" "$archive" | sha256sum -c -
+    tar -xzf "$archive" -C "$temp_dir" "$member"
+    install -m 0755 "$temp_dir/$member" "$destination"
+)
+
+install_portable_tools() {
+    local version checksum archive url
+
+    read -r version checksum <<< "$(portable_metadata starship)"
+    archive="starship-${starship_arch}-unknown-linux-musl.tar.gz"
+    url="https://github.com/starship/starship/releases/download/v${version}/${archive}"
+    install_binary_archive "$url" starship "$LOCAL_BIN/starship" "$checksum"
+
+    read -r version checksum <<< "$(portable_metadata mise)"
+    archive="mise-v${version}-linux-${mise_arch}.tar.gz"
+    url="https://github.com/jdx/mise/releases/download/v${version}/${archive}"
+    install_binary_archive "$url" mise/bin/mise "$LOCAL_BIN/mise" "$checksum"
+
+    read -r version checksum <<< "$(portable_metadata lazygit)"
+    archive="lazygit_${version}_linux_${lazygit_arch}.tar.gz"
+    url="https://github.com/jesseduffield/lazygit/releases/download/v${version}/${archive}"
+    install_binary_archive "$url" lazygit "$LOCAL_BIN/lazygit" "$checksum"
+}
+
+install_neovim() (
+    local version checksum archive url temp_dir install_dir
+    read -r version checksum <<< "$(portable_metadata neovim)"
+    archive="nvim-linux-${neovim_arch}.tar.gz"
+    url="https://github.com/neovim/neovim/releases/download/v${version}/${archive}"
+    temp_dir=$(mktemp -d)
+    trap 'rm -rf "$temp_dir"' EXIT
+    curl -fsSL "$url" -o "$temp_dir/$archive"
+    printf '%s  %s\n' "$checksum" "$temp_dir/$archive" | sha256sum -c -
+    tar -xzf "$temp_dir/$archive" -C "$temp_dir"
+    install_dir="$HOME/.local/lib/nvim"
+    rm -rf "$install_dir"
+    mkdir -p "$(dirname "$install_dir")"
+    mv "$temp_dir/${archive%.tar.gz}" "$install_dir"
+    ln -sf "$install_dir/bin/nvim" "$LOCAL_BIN/nvim"
+)
+
 if [[ ! -r "$OS_RELEASE_FILE" ]]; then
     echo "Cannot detect Linux distribution: $OS_RELEASE_FILE is missing." >&2
     exit 1
@@ -30,6 +84,27 @@ case " ${ID:-} ${ID_LIKE:-} " in
         ;;
     *)
         echo "Unsupported Linux distribution: ${PRETTY_NAME:-${ID:-unknown}}" >&2
+        exit 1
+        ;;
+esac
+
+case "$(uname -m)" in
+    x86_64)
+        checksum_column=5
+        starship_arch=x86_64
+        mise_arch=x64
+        lazygit_arch=x86_64
+        neovim_arch=x86_64
+        ;;
+    aarch64|arm64)
+        checksum_column=6
+        starship_arch=aarch64
+        mise_arch=arm64
+        lazygit_arch=arm64
+        neovim_arch=arm64
+        ;;
+    *)
+        echo "Unsupported architecture: $(uname -m)" >&2
         exit 1
         ;;
 esac
@@ -63,32 +138,8 @@ if [[ "$package_manager" == "apt" ]]; then
     command -v fd >/dev/null 2>&1 || ln -sf "$(command -v fdfind)" "$LOCAL_BIN/fd"
     command -v bat >/dev/null 2>&1 || ln -sf "$(command -v batcat)" "$LOCAL_BIN/bat"
 
-    if ! command -v starship >/dev/null 2>&1; then
-        curl -fsSL https://starship.rs/install.sh | sh -s -- --yes --bin-dir "$LOCAL_BIN"
-    fi
-
-    if ! command -v mise >/dev/null 2>&1; then
-        curl -fsSL https://mise.run | MISE_INSTALL_PATH="$LOCAL_BIN/mise" sh
-    fi
-
-    if ! command -v lazygit >/dev/null 2>&1; then
-        lazygit_version=$(curl -fsSL https://api.github.com/repos/jesseduffield/lazygit/releases/latest | jq -r .tag_name)
-        lazygit_version="${lazygit_version#v}"
-        case "$(uname -m)" in
-            x86_64) lazygit_arch="x86_64" ;;
-            aarch64|arm64) lazygit_arch="arm64" ;;
-            *) echo "Unsupported architecture for lazygit: $(uname -m)" >&2; exit 1 ;;
-        esac
-        archive="lazygit_${lazygit_version}_linux_${lazygit_arch}.tar.gz"
-        temp_dir=$(mktemp -d)
-        trap 'rm -rf "$temp_dir"' EXIT
-        release_url="https://github.com/jesseduffield/lazygit/releases/download/v${lazygit_version}"
-        curl -fsSL "$release_url/$archive" -o "$temp_dir/$archive"
-        curl -fsSL "$release_url/checksums.txt" -o "$temp_dir/checksums.txt"
-        (cd "$temp_dir" && grep " ${archive}$" checksums.txt | sha256sum -c -)
-        tar -xzf "$temp_dir/$archive" -C "$temp_dir" lazygit
-        install -m 0755 "$temp_dir/lazygit" "$LOCAL_BIN/lazygit"
-    fi
+    install_portable_tools
+    install_neovim
 fi
 
 if command -v mise >/dev/null 2>&1; then
