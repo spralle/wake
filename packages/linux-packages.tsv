@@ -1,0 +1,25 @@
+# Tool          Arch package      Debian package    Version     amd64 SHA-256                                                    arm64 SHA-256
+zsh             zsh               zsh               -           -                                                               -
+tmux            tmux              tmux              -           -                                                               -
+starship        starship          -                 1.26.0      b7c232b0e8249d8e55a40beb79c5c43a7d370f3f9408bd215deb0170daeaadf3  dc30189378d2f2e287384e8a692d3f95ad1df64cf0e8c36aa9201516028aed6b
+git             git               git               -           -                                                               -
+delta           git-delta         git-delta         -           -                                                               -
+neovim          neovim            -                 0.12.5      bce0f56eda1f1b1db6eee8f4133d7a38813ea07933837dd1777411ca384c6875  1aa5ca085249580ae0f91eb14f27ec0919773ff2d99a163d03f3d6c21ac29725
+mise            mise              -                 2026.9.1    063dda9149ab6be53da877c2d176afe0eac68e64cf8ca295bd0528720701c65d  98d2ea7b82dd966afdb8a9f4e9edbca771acf2a30d2842bfc0efdb7b61c886a3
+build-tools     base-devel        build-essential   -           -                                                               -
+ripgrep         ripgrep           ripgrep           -           -                                                               -
+fd              fd                fd-find           -           -                                                               -
+bat             bat               bat               -           -                                                               -
+fzf             fzf               fzf               -           -                                                               -
+lazygit         lazygit           -                 0.65.0      44d8e7dd1484b4a66e191bd4ab25a71e8b4b3a65ab122f838e65677ef58c5506  d954a09c128bd37b2bd0d254308474e87de3729cfe0e37f5b46a49357a4fe257
+jq              jq                jq                -           -                                                               -
+curl            curl              curl              -           -                                                               -
+wget            wget              wget              -           -                                                               -
+tar             tar               tar               -           -                                                               -
+unzip           unzip             unzip             -           -                                                               -
+htop            htop              htop              -           -                                                               -
+btop            btop              btop              -           -                                                               -
+docker          docker            docker.io         -           -                                                               -
+docker-compose  docker-compose    docker-compose    -           -                                                               -
+fontconfig      fontconfig        fontconfig        -           -                                                               -
+ssh             openssh           openssh-client    -           -                                                               -
