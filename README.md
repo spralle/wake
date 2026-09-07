@@ -2,14 +2,15 @@
 
 Cross-platform dotfiles managed with [chezmoi](https://chezmoi.io).
 
-Supports **Windows** (PowerShell) and **Arch Linux** (zsh).
+Supports **Windows** (PowerShell), **Arch Linux**, **Debian 13+**, and
+**Ubuntu 24.04+** (zsh). Linux binary fallbacks support amd64 and arm64.
 
 ## Install chezmoi
 
 ### Linux / macOS / WSL
 
 ```bash
-sh -c "$(curl -fsLS get.chezmoi.io)"
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
 ```
 
 ### Windows (pick one)
@@ -29,7 +30,7 @@ Invoke-WebRequest -Uri "https://github.com/twpayne/chezmoi/releases/latest/downl
 
 ```bash
 # Linux/macOS — install chezmoi and apply in one command
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply spralle/wake --branch develop
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply spralle/wake --branch develop
 ```
 
 ```powershell
@@ -145,7 +146,7 @@ rules (e.g., design token conventions, framework constraints).
 - `dot_config/opencode/agents/` — Personal agent prompts (not shared with project contributors)
 - `dot_config/opencode/principles/` — Shared code principles (copied into project repos)
 - `dot_local/bin/` — CLI scripts deployed to `~/.local/bin/` (sync-principles)
-- `packages/` — Declarative package lists for Arch Linux and Windows
+- `packages/` — Declarative package mappings for Linux and a Windows package list
 - `.chezmoiscripts/` — Auto-run scripts for package installation on apply
 - `.chezmoiexternal.toml` — External dependencies (LazyVim, oh-my-zsh)
 - `.chezmoi.toml.tmpl` — Config template (prompts for name/email/is_work)
@@ -158,5 +159,6 @@ rules (e.g., design token conventions, framework constraints).
 - **Git**: Global gitconfig, gitignore, delta diff viewer
 - **Dev tools**: mise, LazyVim, VS Code, EditorConfig, npm
 - **CLI**: ripgrep, bat, lazygit, fzf
-- **Packages**: pacman (Arch), winget (Windows)
-- **SSH**: Config (no keys — those stay local)
+- **Packages**: pacman (Arch), apt (Debian/Ubuntu), winget (Windows)
+- **Runtimes**: Node.js and Bun through mise
+- **SSH**: Config and an age-encrypted private key

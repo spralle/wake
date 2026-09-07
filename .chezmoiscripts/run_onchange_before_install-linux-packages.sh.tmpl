@@ -1,0 +1,103 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+# Install Linux packages on Arch and Debian-family distributions.
+# This script runs when packages/linux-packages.tsv changes.
+# hash: {{ include "packages/linux-packages.tsv" | sha256sum }}
+
+set -euo pipefail
+
+PACKAGE_FILE={{ joinPath .chezmoi.sourceDir "packages/linux-packages.tsv" | quote }}
+MISE_CONFIG_FILE={{ joinPath .chezmoi.sourceDir "dot_config/mise/config.toml" | quote }}
+OS_RELEASE_FILE="${OS_RELEASE_FILE:-/etc/os-release}"
+LOCAL_BIN="${HOME}/.local/bin"
+
+if [[ ! -r "$OS_RELEASE_FILE" ]]; then
+    echo "Cannot detect Linux distribution: $OS_RELEASE_FILE is missing." >&2
+    exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$OS_RELEASE_FILE"
+
+case " ${ID:-} ${ID_LIKE:-} " in
+    *" arch "*)
+        package_column=2
+        package_manager="pacman"
+        ;;
+    *" debian "*|*" ubuntu "*)
+        package_column=3
+        package_manager="apt"
+        ;;
+    *)
+        echo "Unsupported Linux distribution: ${PRETTY_NAME:-${ID:-unknown}}" >&2
+        exit 1
+        ;;
+esac
+
+if (( EUID == 0 )); then
+    sudo_cmd=()
+elif command -v sudo >/dev/null 2>&1; then
+    sudo_cmd=(sudo)
+else
+    echo "Package installation requires root or sudo." >&2
+    exit 1
+fi
+
+mapfile -t packages < <(
+    awk -v column="$package_column" '!/^#/ && NF >= column && $column != "-" { print $column }' "$PACKAGE_FILE"
+)
+
+echo "Installing packages with $package_manager..."
+if [[ "$package_manager" == "pacman" ]]; then
+    "${sudo_cmd[@]}" pacman -Syu --needed --noconfirm "${packages[@]}"
+else
+    "${sudo_cmd[@]}" apt-get update
+    "${sudo_cmd[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y "${packages[@]}"
+fi
+
+mkdir -p "$LOCAL_BIN"
+export PATH="$LOCAL_BIN:$PATH"
+
+if [[ "$package_manager" == "apt" ]]; then
+    # Debian renames these binaries to avoid collisions with other packages.
+    command -v fd >/dev/null 2>&1 || ln -sf "$(command -v fdfind)" "$LOCAL_BIN/fd"
+    command -v bat >/dev/null 2>&1 || ln -sf "$(command -v batcat)" "$LOCAL_BIN/bat"
+
+    if ! command -v starship >/dev/null 2>&1; then
+        curl -fsSL https://starship.rs/install.sh | sh -s -- --yes --bin-dir "$LOCAL_BIN"
+    fi
+
+    if ! command -v mise >/dev/null 2>&1; then
+        curl -fsSL https://mise.run | MISE_INSTALL_PATH="$LOCAL_BIN/mise" sh
+    fi
+
+    if ! command -v lazygit >/dev/null 2>&1; then
+        lazygit_version=$(curl -fsSL https://api.github.com/repos/jesseduffield/lazygit/releases/latest | jq -r .tag_name)
+        lazygit_version="${lazygit_version#v}"
+        case "$(uname -m)" in
+            x86_64) lazygit_arch="x86_64" ;;
+            aarch64|arm64) lazygit_arch="arm64" ;;
+            *) echo "Unsupported architecture for lazygit: $(uname -m)" >&2; exit 1 ;;
+        esac
+        archive="lazygit_${lazygit_version}_linux_${lazygit_arch}.tar.gz"
+        temp_dir=$(mktemp -d)
+        trap 'rm -rf "$temp_dir"' EXIT
+        release_url="https://github.com/jesseduffield/lazygit/releases/download/v${lazygit_version}"
+        curl -fsSL "$release_url/$archive" -o "$temp_dir/$archive"
+        curl -fsSL "$release_url/checksums.txt" -o "$temp_dir/checksums.txt"
+        (cd "$temp_dir" && grep " ${archive}$" checksums.txt | sha256sum -c -)
+        tar -xzf "$temp_dir/$archive" -C "$temp_dir" lazygit
+        install -m 0755 "$temp_dir/lazygit" "$LOCAL_BIN/lazygit"
+    fi
+fi
+
+if command -v mise >/dev/null 2>&1; then
+    MISE_CONFIG_FILE="$MISE_CONFIG_FILE" mise install
+fi
+
+if command -v fc-cache >/dev/null 2>&1; then
+    fc-cache -f
+fi
+
+echo "Package installation complete."
+{{- end }}

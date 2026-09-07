@@ -1,0 +1,24 @@
+# Tool                 Arch package                    Debian package
+zsh                     zsh                             zsh
+tmux                    tmux                            tmux
+starship                starship                        -
+git                     git                             git
+delta                   git-delta                       git-delta
+neovim                  neovim                          neovim
+mise                    mise                            -
+build-tools             base-devel                      build-essential
+ripgrep                 ripgrep                         ripgrep
+fd                      fd                              fd-find
+bat                     bat                             bat
+fzf                     fzf                             fzf
+lazygit                 lazygit                         -
+jq                      jq                              jq
+curl                    curl                            curl
+wget                    wget                            wget
+unzip                   unzip                           unzip
+htop                    htop                            htop
+btop                    btop                            btop
+docker                  docker                          docker.io
+docker-compose          docker-compose                  docker-compose
+fontconfig              fontconfig                      fontconfig
+ssh                     openssh                         openssh-client

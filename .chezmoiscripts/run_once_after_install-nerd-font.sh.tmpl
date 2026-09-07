@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.os "linux" }}
+{{- if eq .chezmoi.os "linux" -}}
 #!/bin/bash
 # Install JetBrainsMono Nerd Font on Linux
 # This script runs once on first chezmoi apply
@@ -10,7 +10,7 @@ NF_VERSION="3.3.0"
 FONT_DIR="${HOME}/.local/share/fonts/NerdFonts"
 
 # Check if already installed
-if fc-list | grep -qi "JetBrainsMono Nerd Font"; then
+if command -v fc-list >/dev/null 2>&1 && fc-list | grep -i "JetBrainsMono Nerd Font" >/dev/null; then
     echo "JetBrainsMono Nerd Font already installed, skipping."
     exit 0
 fi
@@ -30,8 +30,12 @@ mkdir -p "${FONT_DIR}"
 unzip -o "${TEMP_DIR}/${FONT_NAME}.zip" "*.ttf" -d "${FONT_DIR}"
 
 # Refresh font cache
-echo "Refreshing font cache..."
-fc-cache -fv "${FONT_DIR}"
+if command -v fc-cache >/dev/null 2>&1; then
+    echo "Refreshing font cache..."
+    fc-cache -fv "${FONT_DIR}"
+else
+    echo "fontconfig is not installed yet; package setup will refresh the cache."
+fi
 
 # Clean up
 rm -rf "${TEMP_DIR}"
