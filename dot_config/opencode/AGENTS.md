@@ -1,69 +1,32 @@
-## Chain of Command
+## Working Model
 
-Flow:
+- Serve the user's current request before queue triage. Answer read-only questions directly without tracker ceremony. Consult the queue only when asked to select or resume work.
+- Builder orchestrates without coding: normal code changes go to Engineer, then independent Auditor. Architect is conditional on consequential design ambiguity or contract decisions; Explorer is conditional on a discovery bottleneck. Skip either when targets and design are clear.
+- Janitor, Watchman, and Diplomat are optional specialists, not required stages. Builder-owned maintenance changes also require independent audit.
+- YOLO is a user-selected primary agent for direct execution, not a Builder delegation route. The user decides suitability; complexity alone does not require switching agents.
+- Parallelize only independent work with disjoint ownership. Name an integration owner responsible for combining changes and validating the integrated result before audit.
+- Subagents complete assigned work without nested delegation. Request missing decisions or capabilities from the caller.
 
-Builder (Lead/Orchestrate) -> Architect (Plan) -> Engineer (Build) -> Auditor (Test) -> Diplomat (Deploy)
+## Scope, Tracking, and Handoffs
 
-Supporting roles:
+- Follow project-specific instructions and code principles. Keep scope bounded; propose follow-up work separately instead of making unrelated fixes. Create issues only when authorized and appropriate to the project's workflow.
+- Use real issue IDs when relevant, including handoff notes and authorized PR/release communication. Ad-hoc work may be tracker N/A; never invent IDs or tracker states.
+- For tracked work, update the issue before handoff using the project's supported lifecycle. Where supported: Engineer marks `implemented` (ready for audit); Auditor marks `verified` or `changes_requested`; delivery marks `in_review` for an authorized PR and closes only after actual merge/deploy conditions are met. Map these meanings to supported states, not fabricated labels.
+- No mandatory template on every response. Keep progress conversational and final handoffs compact: scope, revision/branch/worktree, evidence and exact check commands/outcomes, risks or blockers, code-principles exceptions, status, and next owner/action. Include issue IDs only when relevant.
+- Implementation is not verification. Normal Builder code changes need an independent Auditor even if Engineer's checks pass. YOLO validates directly and must not claim an independent audit it did not receive.
 
-- Explorer (Research/Discovery) supports Builder and Architect with fast codebase investigation.
-- Janitor handles maintenance and technical debt.
-- Watchman monitors for stalled flow and execution loops.
-- YOLO handles small, self-contained, low-risk tasks directly.
+## Git and Worktree Safety
 
-Explorer usage policy (conditional, not default):
+- Do not stage, commit, amend, push, create PRs, merge, or deploy without user authorization. Finishing a session does not grant authorization or require these mutations.
+- Use isolated worktrees for implementation; honor project-specific Beads and worktree policies first. Verify the actual cwd, branch, base revision, existing dirty state, and ownership before editing. Never overwrite another agent's changes.
+- If the project uses Beads, follow its documented worktree command and verify the shared database location/connection from the actual worktree before tracker mutations. Do not initialize an accidental separate database.
+- Without a project-specific location, create worktrees under `./trees/` relative to the project root, on `feature/*` branches. Verify the parent and existing branches/worktrees before creation. Pass the exact worktree cwd to every implementation delegate.
+- When commits are authorized, keep them focused and atomic; messages explain why. Report uncommitted/unpushed work honestly when delivery is not authorized.
 
-- Use Explorer only when discovery is the bottleneck.
-- Invoke Explorer only if one or more are true:
-  - Target files/owners are unclear after quick direct search.
-  - The change likely spans multiple packages/domains.
-  - Risk/dependency mapping is needed before implementation.
-- If Architect already has high-confidence file targets and dependencies, skip Explorer.
-- Engineer should only do minimal gap-filling searches required to implement.
+## Quality and Changesets
 
-## Handoff Protocol
-
-- Issue IDs are the source of truth at every handoff.
-- Every stage transition must update the issue before work is passed onward.
-- Required handoff statuses:
-  - Engineer sets `implemented` when coding is complete and ready for audit.
-  - Auditor sets `verified` on pass or `changes_requested` on fail.
-  - Diplomat sets `in_review` for PR workflow, then closes the issue on merge/deploy.
-- Handoff artifacts must include issue IDs in notes, PR descriptions, and release communication.
-
-## Code Principles Enforcement
-
-- All agents MUST follow the project's code principles for implementation and audit decisions.
-- Engineer MUST self-check the code principles PR checklist before marking work as implemented.
-- Auditor MUST verify the same checklist and explicitly report any approved exceptions or violations.
-
-## Git Conventions
-
-- Use `feature/*` branches for feature, task, and chore work.
-- Keep commits focused and atomic.
-- Write commit messages that explain *why*, not *what*.
-- **ALWAYS use worktrees for implementation work.** Never commit directly on the main/master branch. Use `bd worktree create` (if the project uses bd) or `git worktree add` to isolate work. All subagents (especially Engineer) must receive the worktree path as their working directory.
-
-## Changesets
-
-When a project uses [changesets](https://github.com/changesets/changesets) for versioning:
-
-- Engineer MUST include a changeset file (`.changeset/*.md`) whenever a publishable package changes.
-- Engineer MUST NOT add a changeset when changes are limited to non-publishable surfaces (docs-only, CI/workflow-only, tests-only with no runtime impact, or internal-only changes).
-- Engineer bump guidance:
-  - `patch`: backward-compatible bug fixes, small internal improvements, dependency updates with no API change.
-  - `minor`: backward-compatible new features or additive API surface.
-  - `major`: breaking API/behavior changes requiring consumer action.
-- Auditor MUST verify that a changeset exists for publishable package changes and that the bump type matches the actual impact.
-- Auditor MUST verify no-changeset cases are correctly justified when no publishable package surface changed.
-
-## Session Completion
-
-When ending a work session, complete ALL steps:
-
-1. File issues for remaining work.
-2. Run quality gates if code changed (tests, linters, builds).
-3. Update issue status — close finished work, update in-progress items.
-4. Push to remote — work is NOT complete until `git push` succeeds.
-5. Verify all changes committed AND pushed.
-6. Hand off — provide context for next session.
+- Self-check the project's code-principles PR checklist before marking implementation complete; Auditor independently verifies it. Report approved exceptions, gate outcomes, and risk-based tests added or why none were needed.
+- Project quality gates are authoritative. Run relevant lint, typecheck, tests, and builds; record exact commands, revision, worktree, and the scope checked. Failures and unavailable checks remain explicit, not silently waived.
+- Audit the actual delivered scope: relevant committed changes plus staged, unstaged, and untracked files. Independently review correctness and run sufficient checks; do not mechanically duplicate every unchanged, verified evidence item. Rerun when scope, environment, evidence, or risk warrants it.
+- Only in projects already using Changesets: include `.changeset/*.md` for publishable package changes, with patch/minor/major matching impact. Do not add one for docs-only, CI-only, tests-only without runtime impact, or internal-only changes. Auditor verifies both bump choice and justified omissions.
+- At session end, summarize remaining work, quality evidence, actual tracker state (if any), and the next action. Delivery and issue creation remain subject to authorization.
