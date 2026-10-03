@@ -9,6 +9,9 @@ Produce a thorough, stack-aware analysis, not an automatic refactor or a checkli
 of fashionable patterns. Activate for an explicit review request, not every edit.
 Read [dimensions.md](dimensions.md) for the exactly 12 review dimensions and
 adapt their subchecks to the selected language, framework, workload, and risk.
+Prioritize false completeness, missing integration, and implementation drift
+often associated with agent-generated code. Apply these checks to all code:
+do not guess authorship or assume agent authorship makes code defective.
 
 ## Authority and safety
 
@@ -51,6 +54,32 @@ adapt their subchecks to the selected language, framework, workload, and risk.
    expectations. Children must not delegate or bypass `task: deny`; return gaps
    to the caller. User-selected YOLO can use this skill directly without children.
 
+## Phased large reviews
+
+- For a large whole-project review, first return a bounded inventory and compact
+  global architecture map, then plan risk-prioritized batches with explicit paths,
+  cross-boundary flows, evidence expectations, ownership, and stopping points.
+  Preserve the requested whole-project scope; phasing is not silent scope reduction.
+- The main owner retains the map, stable finding IDs, cumulative exactly-12-dimension
+  coverage, and pending surfaces. Use fresh read-only batches when delegation is
+  permitted and useful, not per file or per dimension. No full swarm is mandatory;
+  follow the parent's concurrency and fresh-assignment policy, without child delegation.
+- Keep each batch's context compact: objective, cwd/branch/base/current revision,
+  dirty scope, architecture map, prior evidence with provenance, completed/remaining
+  coverage, and next risk boundary. Do not spawn children solely to validate unchanged
+  evidence or a handoff. Each final handoff closes its batch; new batches start fresh.
+- Checkpoint unresolved exploration after roughly 10-15 tool calls or visible soft
+  150-200K context, and before discovery spirals or material unplanned widening.
+  Report findings/progress, checks, blocker, pending coverage, and recommended next
+  batch, not transcripts. These are behavioral guides, not hidden counters/runtime
+  caps; if metrics are unavailable, use task/tool/evidence growth, not invented usage.
+  Finish safe bounded verification; do not abandon running checks for a threshold.
+  Record async handles/status and let the caller decide the next fresh assignment.
+- Batch reports may be partial. Retain the existing 12-row coverage contract and
+  explicitly record remaining features, sampled paths, and unexamined dimensions;
+  synthesize complete coverage only when evidence supports it. All read-only,
+  report-file, issue, execution, and authorization restrictions above remain unchanged.
+
 ## Evidence workflow
 
 1. Inventory stack, entrypoints, packages/services, build/release configuration,
@@ -61,20 +90,64 @@ adapt their subchecks to the selected language, framework, workload, and risk.
    interactions, responses/UI, and failure paths. Compare documented architecture
    against actual imports, wiring, entrypoints, contracts, and data flows. Cite
    divergences; do not infer runtime behavior solely from directory names/docs.
+    Trace bidirectionally: runtime entrypoint -> implementation, then implementation
+    -> callers, registration, exports, rendering, and consumers. Include config
+    values -> consumption -> observable effects, UI callbacks, routes, plugins,
+    and services. Check which parallel/obsolete implementation is authoritative.
+    Look for dead, unreachable, orphaned, unregistered, unexported, unrendered,
+    or unconsumed code; use the inactive-code rules below before labeling it.
 3. Apply all 12 dimensions from the reference within scope. Use targeted searches
    to locate code, then read implementations, callers, contracts, and relevant
    tests. Trace happy, edge, and failure paths, shared invariants, and cross-cutting
    risks. Scale depth to blast radius; record sampled paths and unexamined areas.
    If context/time is insufficient, deliver a partial report with remaining work,
    not a falsely complete review. Avoid duplicate findings across dimensions.
+    For every important new feature in scope, check
+    **Reachability -> behavior -> failure handling -> production-path tests**.
+    Find the real activation path, substantive implementation, error propagation,
+    and tests that exercise that path rather than only helpers or mocks. Missing
+    evidence is a gap, not proof of completion. For broad reviews enumerate the
+    important features examined and those remaining, not an invented full inventory.
 4. Corroborate consequential concerns with a concrete failure path, existing test,
    or authorized safe reproduction when feasible. Capture exact gate commands,
    cwd, revision/dirty scope, exit codes, errors, and unavailable checks. Separate
    checks actually run from suggested tests and reused evidence with provenance.
+    Runtime execution is not always required or safe: static evidence can establish
+    wiring or a definite defect. State what is verified by source versus execution,
+    what is inferred, and remaining limits. Text alone cannot establish runtime
+    confidence, successful deployment, or exercised behavior.
 5. Judge project rules and framework conventions in context. File/function size,
    abstraction, duplication, memoization, casts, parsing, ARIA, or error boundaries
    are not unconditional defects. Explain an applicable required-rule violation
    or demonstrated behavior/maintenance risk, including approved exceptions.
+
+### Suspect inactive code
+
+Search results locate candidates, not verdicts: **no reference != proof of dead
+code**. Inspect build/package outputs, public APIs, generated/dynamic loading,
+reflection, platform variants, plugin conventions, and external consumers before
+concluding that a path is inactive. Record the checked boundaries and unknowns.
+
+Give each examined candidate an inactivity disposition, separate from the existing
+finding classification (`confirmed`, `hypothesis`, `question`) and severity:
+
+- **confirmed dead:** concrete evidence establishes no supported reachable path
+  within the stated scope (e.g. an impossible branch or excluded obsolete module
+  with dispatch, build, exports, and applicable consumer checks). Search alone
+  cannot confirm this; state the evidence and its boundaries.
+- **apparently unwired:** expected integration is missing or reachability is
+  uncertain. Identify the missing caller/registration/consumer and the evidence
+  or safe test needed to distinguish a defect from an intentional boundary.
+- **intentionally retained:** a documented current compatibility, public API,
+  platform, plugin, or generated-entrypoint reason supports retention. A claim
+  of speculative future use does not justify unused scaffolding; report that
+  uncertainty rather than treating a future promise as a current requirement.
+
+Recommend safe removal only when justified, never automatically delete. Identify
+possible breaking exports, external consumers, reflection/registration, platform
+and generated entrypoints, persisted-data compatibility, and rollback impacts.
+Specify confirmation checks and relevant build, contract, integration, or consumer
+tests required before removal; uncertain candidates need investigation first.
 
 ## Report contract
 
@@ -90,6 +163,14 @@ Report the following in chat, adapting layout without dropping evidence:
   `not applicable` with project evidence; inaccessible is not inapplicable.
   Use `no confirmed findings` only for examined surfaces. Never fill all rows
   with passes because evidence is missing; no invented numeric quality scores.
+- **Completeness/wiring inventory:** list examined important features with their
+  entrypoint/registration, implementation and consumers, behavior/failure evidence,
+  production-path test evidence, and current status (`verified` with evidence type,
+  `inferred`, or `unresolved`). Include provenance, sampled paths, exclusions, and
+  remaining scope. For candidate inactive paths include disposition, supporting
+  evidence, unknown consumers, and next confirmation tests. Keep this inventory
+  bounded and merge it with coverage/findings where useful; do not imply exhaustive
+  coverage of a large project from a sample.
 - **Findings:** stable local report IDs (not invented tracker IDs), dimension(s),
   severity, confidence (`high`, `medium`, `low`) with rationale, and classification
   (`confirmed`, `hypothesis`, or `question`). Include `path:line(s)` and relevant
@@ -98,6 +179,12 @@ Report the following in chat, adapting layout without dropping evidence:
   Use configuration/doc locations for architectural findings; disclose missing
   line evidence rather than inventing it. Keep unproven concerns/questions separate
   from confirmed defects. No minimum finding quota; an empty list is valid.
+- **Agent-risk summary:** group real findings about false completeness/wiring,
+  drift, unsupported APIs/configuration, weak verification, and other applicable
+  risks by cross-referencing finding IDs, not repeating findings or inventing new
+  ones. Reconcile docs and agent claims against actual reachable paths. Integrate
+  this into the synthesis when concise; do not require a second long checklist or
+  speculate about authorship. State evidence gaps rather than assigning fake scores.
 - **Validation and principles:** exact commands/outcomes and reused evidence,
   checks not run and why, project checklist results/approved exceptions, and tests
   proposed proportional to identified risk. Passing gates do not prove all 12
